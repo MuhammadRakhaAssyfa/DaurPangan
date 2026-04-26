@@ -47,6 +47,14 @@ export const providerTypes: ProviderTypeMeta[] = [
 export const providerTypeMap: Record<ProviderType, ProviderTypeMeta> =
   Object.fromEntries(providerTypes.map((p) => [p.id, p])) as Record<ProviderType, ProviderTypeMeta>;
 
+export type ProductCondition = "segar" | "mendekati" | "sisa";
+
+export const conditionMap: Record<ProductCondition, { label: string; className: string }> = {
+  segar: { label: "Segar", className: "bg-success/10 text-success border-success/30" },
+  mendekati: { label: "Mendekati expired", className: "bg-accent/15 text-accent-foreground border-accent/40" },
+  sisa: { label: "Sisa display", className: "bg-muted text-muted-foreground border-border" },
+};
+
 export interface FoodListing {
   id: string;
   name: string;
@@ -54,14 +62,35 @@ export interface FoodListing {
   providerType: ProviderType;
   providerRating: number;
   image: string;
+  /** Numeric quantity remaining (porsi/kg/box/etc) */
+  quantityValue: number;
+  /** Unit label, e.g. "porsi", "kg", "ikat", "bungkus" */
+  quantityUnit: string;
+  /** Pre-formatted display string (kept for compatibility) */
   quantity: string;
   expiresAt: Date;
+  /** Whether expiry is per-day (toko & pasar) instead of hourly */
+  expiryGranularity?: "hour" | "day";
   distanceKm: number;
+  walkMinutes?: number;
   isFree: boolean;
   price?: number;
+  /** Original price used to render strikethrough discount */
+  originalPrice?: number;
+  /** Full pickup address (hidden for rumah tangga) */
   location: string;
+  /** Area only — kelurahan/kecamatan, used for rumah tangga */
+  area?: string;
   status: FoodStatus;
   category: "nasi" | "roti" | "sayur" | "buah" | "kue";
+  /** Optional notes shown on detail/claim */
+  notes?: string;
+  /** Minimum claim quantity (Hotel & Katering) */
+  minClaim?: number;
+  /** Product freshness/condition (Toko & Pasar) */
+  condition?: ProductCondition;
+  /** Whether the listing requires manual provider confirmation before deal */
+  requiresConfirmation?: boolean;
 }
 
 const inHours = (h: number) => new Date(Date.now() + h * 3600 * 1000);
@@ -69,80 +98,107 @@ const inHours = (h: number) => new Date(Date.now() + h * 3600 * 1000);
 export const mockListings: FoodListing[] = [
   {
     id: "1",
-    name: "Nasi Box Catering",
+    name: "Nasi Box Catering Acara",
     provider: "Hotel Sahid Jakarta",
     providerType: "hotel",
     providerRating: 4.9,
     image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=70",
+    quantityValue: 25,
+    quantityUnit: "porsi",
     quantity: "25 porsi",
     expiresAt: inHours(3),
     distanceKm: 1.2,
+    walkMinutes: 15,
     isFree: true,
-    location: "Jakarta Pusat",
+    location: "Jl. Jend. Sudirman No. 86, Jakarta Pusat",
     status: "available",
     category: "nasi",
+    minClaim: 10,
+    notes: "Halal, tersedia packaging box.",
   },
   {
     id: "2",
-    name: "Roti Tawar & Pastry",
+    name: "Roti Tawar Hampir Expired",
     provider: "BreadTalk Plaza Senayan",
     providerType: "toko",
     providerRating: 4.7,
     image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&q=70",
+    quantityValue: 15,
+    quantityUnit: "bungkus",
     quantity: "15 bungkus",
     expiresAt: inHours(8),
+    expiryGranularity: "day",
     distanceKm: 2.4,
+    walkMinutes: 28,
     isFree: false,
     price: 5000,
-    location: "Senayan",
+    originalPrice: 18000,
+    location: "Plaza Senayan Lt. 1, Senayan",
     status: "available",
     category: "roti",
+    condition: "mendekati",
   },
   {
     id: "3",
-    name: "Sayur Segar Pasar",
+    name: "Sayur Bayam Segar",
     provider: "Pasar Mayestik",
     providerType: "toko",
     providerRating: 4.6,
     image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=800&q=70",
+    quantityValue: 5,
+    quantityUnit: "kg",
     quantity: "5 kg",
     expiresAt: inHours(12),
+    expiryGranularity: "day",
     distanceKm: 0.8,
+    walkMinutes: 10,
     isFree: true,
-    location: "Kebayoran Baru",
+    location: "Lapak A12, Pasar Mayestik, Kebayoran Baru",
     status: "available",
     category: "sayur",
+    condition: "segar",
   },
   {
     id: "4",
-    name: "Buah Potong Premium",
+    name: "Nasi Ayam Bakar Sisa Makan Siang",
     provider: "Restoran Bunga Rampai",
     providerType: "restoran",
     providerRating: 4.8,
     image: "https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?w=800&q=70",
-    quantity: "10 box",
+    quantityValue: 10,
+    quantityUnit: "porsi",
+    quantity: "10 porsi",
     expiresAt: inHours(5),
     distanceKm: 3.1,
+    walkMinutes: 36,
     isFree: false,
     price: 8000,
-    location: "Menteng",
+    originalPrice: 35000,
+    location: "Jl. Teuku Cik Ditiro No. 35, Menteng",
     status: "available",
     category: "buah",
+    notes: "Mengandung kacang.",
   },
   {
     id: "5",
-    name: "Kue Tradisional",
-    provider: "Bu Sari (Rumah Tangga)",
+    name: "Kue Lebaran Buatan Sendiri",
+    provider: "Bu Sari",
     providerType: "rumah",
     providerRating: 4.5,
     image: "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=800&q=70",
+    quantityValue: 30,
+    quantityUnit: "buah",
     quantity: "30 buah",
     expiresAt: inHours(2),
     distanceKm: 1.7,
+    walkMinutes: 20,
     isFree: true,
-    location: "Tanah Abang",
+    location: "private",
+    area: "Tanah Abang",
     status: "available",
     category: "kue",
+    notes: "Bisa diantar radius 1km.",
+    requiresConfirmation: true,
   },
   {
     id: "6",
@@ -151,12 +207,16 @@ export const mockListings: FoodListing[] = [
     providerType: "restoran",
     providerRating: 4.9,
     image: "https://images.unsplash.com/photo-1567337710282-00832b415979?w=800&q=70",
+    quantityValue: 12,
+    quantityUnit: "porsi",
     quantity: "12 porsi",
     expiresAt: inHours(4),
     distanceKm: 2.0,
+    walkMinutes: 24,
     isFree: false,
     price: 10000,
-    location: "Sabang",
+    originalPrice: 28000,
+    location: "Jl. Sabang No. 19, Jakarta Pusat",
     status: "available",
     category: "nasi",
   },
