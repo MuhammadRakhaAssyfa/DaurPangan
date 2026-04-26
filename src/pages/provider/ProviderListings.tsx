@@ -1,40 +1,46 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Plus, Package, Leaf, TrendingUp, MoreHorizontal, ArrowRight } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Plus, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { mockListings, type FoodListing } from "@/lib/mock-data";
+import { mockListings, type FoodListing, type FoodStatus } from "@/lib/mock-data";
 import { UploadFoodDialog } from "@/components/provider/UploadFoodDialog";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-const statusStyle: Record<FoodListing["status"], string> = {
+const statusStyle: Record<FoodStatus, string> = {
   available: "bg-success/10 text-success border-success/20",
   claimed: "bg-accent/15 text-accent-foreground border-accent/30",
   expired: "bg-muted text-muted-foreground border-border",
 };
-const statusLabel: Record<FoodListing["status"], string> = {
+const statusLabel: Record<FoodStatus, string> = {
   available: "Tersedia",
   claimed: "Diklaim",
   expired: "Kedaluwarsa",
 };
 
-const ProviderDashboard = () => {
+const filters: { id: FoodStatus | "all"; label: string }[] = [
+  { id: "all", label: "Semua" },
+  { id: "available", label: "Tersedia" },
+  { id: "claimed", label: "Diklaim" },
+  { id: "expired", label: "Kedaluwarsa" },
+];
+
+const ProviderListings = () => {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
+  const [filter, setFilter] = useState<FoodStatus | "all">("all");
   const [listings, setListings] = useState<FoodListing[]>(
-    mockListings.slice(0, 4).map((l, i) => ({
+    mockListings.map((l, i) => ({
       ...l,
-      status: i === 1 ? "claimed" : i === 3 ? "expired" : "available",
+      status: i % 3 === 1 ? "claimed" : i % 5 === 4 ? "expired" : "available",
     })),
   );
 
-  const stats = [
-    { icon: Package, label: "Total Upload", value: "47", sub: "bulan ini" },
-    { icon: TrendingUp, label: "Diklaim", value: "39", sub: "tingkat sukses 83%" },
-    { icon: Leaf, label: "Kg Diselamatkan", value: "284", sub: "estimasi" },
-  ];
+  const filtered = useMemo(
+    () => (filter === "all" ? listings : listings.filter((l) => l.status === filter)),
+    [filter, listings],
+  );
 
   const handleAdd = (data: Partial<FoodListing>) => {
     const newL: FoodListing = {
@@ -61,45 +67,38 @@ const ProviderDashboard = () => {
     <div className="container py-10">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <span className="text-xs font-bold tracking-[0.2em] text-primary uppercase">Dashboard Penyedia</span>
-          <h1 className="mt-1 font-display text-3xl md:text-4xl font-bold">
-            Halo, {user?.name?.split(" ")[0] || "Penyedia"} 🌱
-          </h1>
-          <p className="text-muted-foreground mt-1">Kelola surplus makanan Anda dan lihat dampaknya.</p>
+          <span className="text-xs font-bold tracking-[0.2em] text-primary uppercase">Listing Saya</span>
+          <h1 className="mt-1 font-display text-3xl md:text-4xl font-bold">Kelola semua listing</h1>
+          <p className="text-muted-foreground mt-1">{listings.length} total listing</p>
         </div>
         <Button size="lg" variant="hero" onClick={() => setOpen(true)}>
           <Plus className="h-4 w-4" /> Upload Makanan
         </Button>
       </div>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-3">
-        {stats.map((s) => (
-          <div key={s.label} className="rounded-2xl border border-border bg-card p-5 shadow-soft">
-            <div className="flex items-center justify-between">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-soft text-primary">
-                <s.icon className="h-5 w-5" />
-              </div>
-              <span className="text-xs text-muted-foreground">{s.sub}</span>
-            </div>
-            <p className="mt-4 text-sm text-muted-foreground">{s.label}</p>
-            <p className="font-display text-3xl font-extrabold">{s.value}</p>
-          </div>
+      <div className="mt-6 flex flex-wrap gap-2">
+        {filters.map((f) => (
+          <Badge
+            key={f.id}
+            onClick={() => setFilter(f.id)}
+            className={cn(
+              "cursor-pointer px-4 py-1.5 text-sm border transition-colors",
+              filter === f.id
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-card text-foreground border-border hover:bg-muted",
+            )}
+          >
+            {f.label}
+          </Badge>
         ))}
       </div>
 
-      <div className="mt-10">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-display text-xl font-bold">Listing Aktif</h2>
-          <Button asChild variant="ghost" size="sm">
-            <Link to="/provider/listings">
-              Lihat semua <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
-
-        <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-soft">
+      <div className="mt-6 rounded-2xl border border-border bg-card overflow-hidden shadow-soft">
+        {filtered.length === 0 ? (
+          <p className="p-12 text-center text-muted-foreground">Tidak ada listing dengan filter ini.</p>
+        ) : (
           <ul className="divide-y divide-border">
-            {listings.map((l) => (
+            {filtered.map((l) => (
               <li key={l.id} className="flex items-center gap-4 p-4 hover:bg-muted/40 transition-colors">
                 <img src={l.image} alt={l.name} className="h-16 w-16 rounded-xl object-cover" loading="lazy" />
                 <div className="flex-1 min-w-0">
@@ -119,7 +118,7 @@ const ProviderDashboard = () => {
               </li>
             ))}
           </ul>
-        </div>
+        )}
       </div>
 
       <UploadFoodDialog open={open} onOpenChange={setOpen} onSubmit={handleAdd} />
@@ -127,4 +126,4 @@ const ProviderDashboard = () => {
   );
 };
 
-export default ProviderDashboard;
+export default ProviderListings;
