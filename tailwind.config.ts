@@ -57,6 +57,24 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        provider: {
+          restoran: {
+            DEFAULT: "hsl(var(--provider-restoran))",
+            foreground: "hsl(var(--provider-restoran-foreground))",
+          },
+          hotel: {
+            DEFAULT: "hsl(var(--provider-hotel))",
+            foreground: "hsl(var(--provider-hotel-foreground))",
+          },
+          toko: {
+            DEFAULT: "hsl(var(--provider-toko))",
+            foreground: "hsl(var(--provider-toko-foreground))",
+          },
+          rumah: {
+            DEFAULT: "hsl(var(--provider-rumah))",
+            foreground: "hsl(var(--provider-rumah-foreground))",
+          },
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

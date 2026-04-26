@@ -36,6 +36,16 @@
     --success: 121 38% 27%;
     --success-foreground: 120 25% 98%;
 
+    /* Provider type accents (used for left border + badge per provider type) */
+    --provider-restoran: 121 38% 27%;
+    --provider-restoran-foreground: 120 25% 98%;
+    --provider-hotel: 224 76% 48%;
+    --provider-hotel-foreground: 210 40% 98%;
+    --provider-toko: 27 87% 57%;
+    --provider-toko-foreground: 25 60% 14%;
+    --provider-rumah: 220 9% 46%;
+    --provider-rumah-foreground: 0 0% 100%;
+
     --destructive: 0 75% 55%;
     --destructive-foreground: 0 0% 100%;
 
