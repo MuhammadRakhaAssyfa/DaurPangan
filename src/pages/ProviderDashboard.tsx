@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Package, Leaf, TrendingUp, MoreHorizontal, ArrowRight } from "lucide-react";
+import { Plus, Package, Leaf, TrendingUp, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { mockListings, type FoodListing } from "@/lib/mock-data";
+import { type FoodListing } from "@/lib/mock-data";
 import { UploadFoodDialog } from "@/components/provider/UploadFoodDialog";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
@@ -23,17 +23,45 @@ const statusLabel: Record<FoodListing["status"], string> = {
 const ProviderDashboard = () => {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
-  const [listings, setListings] = useState<FoodListing[]>(
-    mockListings.slice(0, 4).map((l, i) => ({
-      ...l,
-      status: i === 1 ? "claimed" : i === 3 ? "expired" : "available",
-    })),
+  // New accounts start with no listings — never seed dummy data.
+  const [listings, setListings] = useState<FoodListing[]>([]);
+
+  const totalUploads = listings.length;
+  const claimed = listings.filter((l) => l.status === "claimed").length;
+  // ~0.4 kg per portion as a simple estimator. Only counts claimed listings
+  // (treated as picked up for demo purposes). Real value will come from
+  // pickup confirmation in production.
+  const kgSaved = Math.round(
+    listings
+      .filter((l) => l.status === "claimed")
+      .reduce((sum, l) => sum + l.quantityValue * 0.4, 0),
   );
 
   const stats = [
-    { icon: Package, label: "Total Upload", value: "47", sub: "bulan ini" },
-    { icon: TrendingUp, label: "Diklaim", value: "39", sub: "tingkat sukses 83%" },
-    { icon: Leaf, label: "Kg Diselamatkan", value: "284", sub: "estimasi" },
+    {
+      icon: Package,
+      label: "Total Upload",
+      value: totalUploads,
+      empty: "Belum ada listing · Upload makanan pertamamu! 🍱",
+      sub: totalUploads > 0 ? "sepanjang waktu" : undefined,
+    },
+    {
+      icon: TrendingUp,
+      label: "Diklaim",
+      value: claimed,
+      empty: "Belum ada klaim · Listingmu akan muncul di sini 📦",
+      sub:
+        claimed > 0 && totalUploads > 0
+          ? `tingkat sukses ${Math.round((claimed / totalUploads) * 100)}%`
+          : undefined,
+    },
+    {
+      icon: Leaf,
+      label: "Kg Diselamatkan",
+      value: kgSaved,
+      empty: "0 kg · Setiap gram yang kamu bagikan dihitung 🌿",
+      sub: kgSaved > 0 ? "estimasi" : undefined,
+    },
   ];
 
   const handleAdd = (data: Partial<FoodListing>) => {
@@ -82,18 +110,24 @@ const ProviderDashboard = () => {
       </div>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
-        {stats.map((s) => (
-          <div key={s.label} className="rounded-2xl border border-border bg-card p-5 shadow-soft">
-            <div className="flex items-center justify-between">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-soft text-primary">
-                <s.icon className="h-5 w-5" />
+        {stats.map((s) => {
+          const isEmpty = s.value === 0;
+          return (
+            <div key={s.label} className="rounded-2xl border border-border bg-card p-5 shadow-soft">
+              <div className="flex items-center justify-between">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-soft text-primary">
+                  <s.icon className="h-5 w-5" />
+                </div>
+                {s.sub && <span className="text-xs text-muted-foreground">{s.sub}</span>}
               </div>
-              <span className="text-xs text-muted-foreground">{s.sub}</span>
+              <p className="mt-4 text-sm text-muted-foreground">{s.label}</p>
+              <p className="font-display text-3xl font-extrabold">{s.value}</p>
+              {isEmpty && (
+                <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{s.empty}</p>
+              )}
             </div>
-            <p className="mt-4 text-sm text-muted-foreground">{s.label}</p>
-            <p className="font-display text-3xl font-extrabold">{s.value}</p>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="mt-10">
@@ -107,27 +141,38 @@ const ProviderDashboard = () => {
         </div>
 
         <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-soft">
-          <ul className="divide-y divide-border">
-            {listings.map((l) => (
-              <li key={l.id} className="flex items-center gap-4 p-4 hover:bg-muted/40 transition-colors">
-                <img src={l.image} alt={l.name} className="h-16 w-16 rounded-xl object-cover" loading="lazy" />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-semibold truncate">{l.name}</p>
-                    <Badge variant="outline" className={cn("text-xs", statusStyle[l.status])}>
-                      {statusLabel[l.status]}
-                    </Badge>
+          {listings.length === 0 ? (
+            <div className="p-12 text-center flex flex-col items-center gap-3">
+              <div className="text-4xl" aria-hidden>📭</div>
+              <p className="font-semibold">Kamu belum punya listing aktif</p>
+              <p className="text-sm text-muted-foreground max-w-sm">
+                Mulai bagikan surplus makananmu untuk membantu komunitas sekitar.
+              </p>
+              <Button variant="hero" onClick={() => setOpen(true)} className="mt-2">
+                <Plus className="h-4 w-4" /> Upload Makanan Pertama
+              </Button>
+            </div>
+          ) : (
+            <ul className="divide-y divide-border">
+              {listings.map((l) => (
+                <li key={l.id} className="flex items-center gap-4 p-4 hover:bg-muted/40 transition-colors">
+                  <img src={l.image} alt={l.name} className="h-16 w-16 rounded-xl object-cover" loading="lazy" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="font-semibold truncate">{l.name}</p>
+                      <Badge variant="outline" className={cn("text-xs", statusStyle[l.status])}>
+                        {statusLabel[l.status]}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground truncate">
+                      {l.quantity} · {l.location === "private" ? l.area : l.location} ·{" "}
+                      {l.isFree ? "Gratis" : `Rp${l.price?.toLocaleString("id-ID")}`}
+                    </p>
                   </div>
-                  <p className="text-sm text-muted-foreground truncate">
-                    {l.quantity} · {l.location} · {l.isFree ? "Gratis" : `Rp${l.price?.toLocaleString("id-ID")}`}
-                  </p>
-                </div>
-                <Button variant="ghost" size="icon" className="shrink-0">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </li>
-            ))}
-          </ul>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
 

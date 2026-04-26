@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Plus, MoreHorizontal, Pencil, Trash2, CheckCircle2 } from "lucide-react";
+import { Plus, MoreHorizontal, Pencil, Trash2, CheckCircle2, Inbox } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -8,8 +8,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { mockListings, type FoodListing, type FoodStatus } from "@/lib/mock-data";
+import { type FoodListing, type FoodStatus } from "@/lib/mock-data";
 import { UploadFoodDialog } from "@/components/provider/UploadFoodDialog";
+import { EditListingDialog } from "@/components/provider/EditListingDialog";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -36,24 +37,9 @@ const ProviderListings = () => {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState<FoodStatus | "all">("all");
-
-  // Only listings owned by THIS provider account.
-  // We seed with a couple of mock listings rebranded to the current user so
-  // the page never shows other providers' data.
-  const [listings, setListings] = useState<FoodListing[]>(() => {
-    const ownName = user?.name || "Akun Saya";
-    const ownType = user?.providerType || "restoran";
-    return mockListings
-      .filter((l) => l.providerType === ownType)
-      .slice(0, 3)
-      .map((l, i) => ({
-        ...l,
-        id: `own-${l.id}`,
-        provider: ownName,
-        providerType: ownType,
-        status: (i === 1 ? "claimed" : "available") as FoodStatus,
-      }));
-  });
+  // Start empty — new accounts have zero listings.
+  const [listings, setListings] = useState<FoodListing[]>([]);
+  const [editTarget, setEditTarget] = useState<FoodListing | null>(null);
 
   const filtered = useMemo(
     () => (filter === "all" ? listings : listings.filter((l) => l.status === filter)),
@@ -102,6 +88,11 @@ const ProviderListings = () => {
     toast.success("Listing ditandai habis");
   };
 
+  const handleEditSave = (id: string, patch: Partial<FoodListing>) => {
+    setListings((prev) => prev.map((l) => (l.id === id ? { ...l, ...patch } : l)));
+    toast.success("Perubahan tersimpan");
+  };
+
   return (
     <div className="container py-10">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
@@ -135,8 +126,22 @@ const ProviderListings = () => {
       </div>
 
       <div className="mt-6 rounded-2xl border border-border bg-card overflow-hidden shadow-soft">
-        {filtered.length === 0 ? (
-          <p className="p-12 text-center text-muted-foreground">Tidak ada listing dengan filter ini.</p>
+        {listings.length === 0 ? (
+          <div className="p-12 text-center flex flex-col items-center gap-3">
+            <div className="text-4xl" aria-hidden>📭</div>
+            <p className="font-semibold">Kamu belum punya listing aktif</p>
+            <p className="text-sm text-muted-foreground max-w-sm">
+              Mulai bagikan surplus makananmu untuk membantu komunitas sekitar.
+            </p>
+            <Button variant="hero" onClick={() => setOpen(true)} className="mt-2">
+              <Plus className="h-4 w-4" /> Upload Makanan Pertama
+            </Button>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="p-12 text-center text-muted-foreground flex flex-col items-center gap-2">
+            <Inbox className="h-8 w-8" />
+            <p>Tidak ada listing dengan filter ini.</p>
+          </div>
         ) : (
           <ul className="divide-y divide-border">
             {filtered.map((l) => (
@@ -150,7 +155,8 @@ const ProviderListings = () => {
                     </Badge>
                   </div>
                   <p className="text-sm text-muted-foreground truncate">
-                    {l.quantity} · {l.location} · {l.isFree ? "Gratis" : `Rp${l.price?.toLocaleString("id-ID")}`}
+                    {l.quantity} · {l.location === "private" ? l.area : l.location} ·{" "}
+                    {l.isFree ? "Gratis" : `Rp${l.price?.toLocaleString("id-ID")}`}
                   </p>
                 </div>
                 <DropdownMenu>
@@ -160,7 +166,7 @@ const ProviderListings = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-44">
-                    <DropdownMenuItem onClick={() => toast.info("Edit segera hadir")}>
+                    <DropdownMenuItem onClick={() => setEditTarget(l)}>
                       <Pencil className="h-4 w-4" /> Edit
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => handleMarkOut(l.id)}>
@@ -181,6 +187,12 @@ const ProviderListings = () => {
       </div>
 
       <UploadFoodDialog open={open} onOpenChange={setOpen} onSubmit={handleAdd} />
+      <EditListingDialog
+        listing={editTarget}
+        open={!!editTarget}
+        onOpenChange={(o) => !o && setEditTarget(null)}
+        onSave={handleEditSave}
+      />
     </div>
   );
 };

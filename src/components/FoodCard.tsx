@@ -1,8 +1,15 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Calendar, Clock, Footprints, MapPin, Star, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { conditionMap, providerTypeMap, type FoodListing, type ProviderType } from "@/lib/mock-data";
+import {
+  conditionMap,
+  providerIdByName,
+  providerTypeMap,
+  type FoodListing,
+  type ProviderType,
+} from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
 const formatRupiah = (n: number) => `Rp${n.toLocaleString("id-ID")}`;
@@ -149,7 +156,19 @@ export const FoodCard = ({ listing, onClaim }: Props) => {
             {listing.providerRating}
           </span>
         </div>
-        <p className="text-sm text-muted-foreground">{listing.provider}</p>
+        {(() => {
+          const pid = providerIdByName[listing.provider];
+          return pid ? (
+            <Link
+              to={`/provider/${pid}/profile`}
+              className="text-sm text-muted-foreground hover:text-foreground hover:underline underline-offset-2 transition-colors w-fit"
+            >
+              {listing.provider}
+            </Link>
+          ) : (
+            <p className="text-sm text-muted-foreground">{listing.provider}</p>
+          );
+        })()}
 
         <div className="flex flex-wrap items-center gap-1.5">
           <Badge className={cn("text-[11px] font-semibold gap-1 px-2 py-0.5", theme.badge)}>

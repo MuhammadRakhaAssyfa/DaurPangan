@@ -353,3 +353,141 @@ export const mockNotifications: RecipientNotification[] = [
     listingId: "5",
   },
 ];
+
+// ============= Provider directory (public profiles) =============
+
+export interface ProviderReview {
+  id: string;
+  authorName: string; // first name only — privacy
+  rating: number;
+  comment: string;
+  date: Date;
+}
+
+export interface ProviderImpactStats {
+  kgSaved: number;
+  totalUploads: number;
+  recipientsHelped: number;
+}
+
+export interface ProviderProfile {
+  id: string;
+  name: string;
+  type: ProviderType;
+  area: string;
+  rating: number;
+  totalReviews: number;
+  bio: string;
+  avatar: string;
+  impact: ProviderImpactStats;
+  reviews: ProviderReview[];
+}
+
+const reviewsFor = (seed: string): ProviderReview[] => [
+  {
+    id: `${seed}-r1`,
+    authorName: "Andi",
+    rating: 5,
+    comment: "Makanannya masih hangat dan ramah sekali, terima kasih!",
+    date: daysAgo(2),
+  },
+  {
+    id: `${seed}-r2`,
+    authorName: "Sari",
+    rating: 5,
+    comment: "Pickup mudah, packagingnya rapi.",
+    date: daysAgo(5),
+  },
+  {
+    id: `${seed}-r3`,
+    authorName: "Budi",
+    rating: 4,
+    comment: "Porsinya banyak, sangat membantu komunitas kami.",
+    date: daysAgo(9),
+  },
+];
+
+export const mockProviders: ProviderProfile[] = [
+  {
+    id: "p-hotel-sahid",
+    name: "Hotel Sahid Jakarta",
+    type: "hotel",
+    area: "Jakarta Pusat",
+    rating: 4.9,
+    totalReviews: 124,
+    bio: "Hotel bintang lima yang rutin membagikan surplus katering acara untuk komunitas sekitar.",
+    avatar: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=300&q=70",
+    impact: { kgSaved: 482, totalUploads: 96, recipientsHelped: 312 },
+    reviews: reviewsFor("hotel-sahid"),
+  },
+  {
+    id: "p-breadtalk",
+    name: "BreadTalk Plaza Senayan",
+    type: "toko",
+    area: "Senayan",
+    rating: 4.7,
+    totalReviews: 88,
+    bio: "Toko roti yang membagikan stok mendekati expired setiap sore.",
+    avatar: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=300&q=70",
+    impact: { kgSaved: 230, totalUploads: 142, recipientsHelped: 410 },
+    reviews: reviewsFor("breadtalk"),
+  },
+  {
+    id: "p-mayestik",
+    name: "Pasar Mayestik",
+    type: "toko",
+    area: "Kebayoran Baru",
+    rating: 4.6,
+    totalReviews: 54,
+    bio: "Pedagang sayur kolektif yang membagikan hasil panen sisa setiap akhir hari.",
+    avatar: "https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=300&q=70",
+    impact: { kgSaved: 612, totalUploads: 201, recipientsHelped: 380 },
+    reviews: reviewsFor("mayestik"),
+  },
+  {
+    id: "p-bunga-rampai",
+    name: "Restoran Bunga Rampai",
+    type: "restoran",
+    area: "Menteng",
+    rating: 4.8,
+    totalReviews: 76,
+    bio: "Restoran nusantara yang berkomitmen mengurangi food waste setiap hari.",
+    avatar: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=300&q=70",
+    impact: { kgSaved: 198, totalUploads: 64, recipientsHelped: 220 },
+    reviews: reviewsFor("bunga-rampai"),
+  },
+  {
+    id: "p-bu-sari",
+    name: "Bu Sari",
+    type: "rumah",
+    area: "Tanah Abang",
+    rating: 4.5,
+    totalReviews: 18,
+    bio: "Ibu rumah tangga yang sering membagikan masakan rumahan untuk tetangga.",
+    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&q=70",
+    impact: { kgSaved: 24, totalUploads: 19, recipientsHelped: 31 },
+    reviews: reviewsFor("bu-sari"),
+  },
+  {
+    id: "p-sederhana",
+    name: "RM Sederhana",
+    type: "restoran",
+    area: "Jakarta Pusat",
+    rating: 4.9,
+    totalReviews: 102,
+    bio: "Rumah makan padang yang aktif berbagi sisa nasi & lauk setiap malam.",
+    avatar: "https://images.unsplash.com/photo-1567337710282-00832b415979?w=300&q=70",
+    impact: { kgSaved: 356, totalUploads: 130, recipientsHelped: 295 },
+    reviews: reviewsFor("sederhana"),
+  },
+];
+
+export const providerProfileMap: Record<string, ProviderProfile> = Object.fromEntries(
+  mockProviders.map((p) => [p.id, p]),
+);
+
+/** Map a listing's provider name to a provider profile id when possible */
+export const providerIdByName: Record<string, string> = Object.fromEntries(
+  mockProviders.map((p) => [p.name, p.id]),
+);
+
