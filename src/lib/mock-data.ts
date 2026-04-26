@@ -91,7 +91,13 @@ export interface FoodListing {
   condition?: ProductCondition;
   /** Whether the listing requires manual provider confirmation before deal */
   requiresConfirmation?: boolean;
+  /** Geo coordinates for map display */
+  lat?: number;
+  lng?: number;
 }
+
+/** Default Jakarta center used by the recipient map */
+export const JAKARTA_CENTER = { lat: -6.2088, lng: 106.8456 };
 
 const inHours = (h: number) => new Date(Date.now() + h * 3600 * 1000);
 
@@ -111,6 +117,8 @@ export const mockListings: FoodListing[] = [
     walkMinutes: 15,
     isFree: true,
     location: "Jl. Jend. Sudirman No. 86, Jakarta Pusat",
+    lat: -6.2146,
+    lng: 106.8221,
     status: "available",
     category: "nasi",
     minClaim: 10,
@@ -134,6 +142,8 @@ export const mockListings: FoodListing[] = [
     price: 5000,
     originalPrice: 18000,
     location: "Plaza Senayan Lt. 1, Senayan",
+    lat: -6.2253,
+    lng: 106.7993,
     status: "available",
     category: "roti",
     condition: "mendekati",
@@ -154,6 +164,8 @@ export const mockListings: FoodListing[] = [
     walkMinutes: 10,
     isFree: true,
     location: "Lapak A12, Pasar Mayestik, Kebayoran Baru",
+    lat: -6.2429,
+    lng: 106.7975,
     status: "available",
     category: "sayur",
     condition: "segar",
@@ -175,6 +187,8 @@ export const mockListings: FoodListing[] = [
     price: 8000,
     originalPrice: 35000,
     location: "Jl. Teuku Cik Ditiro No. 35, Menteng",
+    lat: -6.1958,
+    lng: 106.8324,
     status: "available",
     category: "buah",
     notes: "Mengandung kacang.",
@@ -195,6 +209,8 @@ export const mockListings: FoodListing[] = [
     isFree: true,
     location: "private",
     area: "Tanah Abang",
+    lat: -6.1862,
+    lng: 106.8106,
     status: "available",
     category: "kue",
     notes: "Bisa diantar radius 1km.",
@@ -217,6 +233,8 @@ export const mockListings: FoodListing[] = [
     price: 10000,
     originalPrice: 28000,
     location: "Jl. Sabang No. 19, Jakarta Pusat",
+    lat: -6.1830,
+    lng: 106.8267,
     status: "available",
     category: "nasi",
   },
@@ -491,3 +509,13 @@ export const providerIdByName: Record<string, string> = Object.fromEntries(
   mockProviders.map((p) => [p.name, p.id]),
 );
 
+
+// ============= Recipient address =============
+
+export interface RecipientAddress {
+  fullAddress: string;
+  kelurahan: string;
+  kecamatan: string;
+  kota: string;
+  kodePos: string;
+}

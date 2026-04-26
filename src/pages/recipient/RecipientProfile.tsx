@@ -1,6 +1,7 @@
 import { Mail, Star, MapPin } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { RoleBadge } from "@/components/RoleBadge";
+import { RecipientAddressCard } from "@/components/recipient/RecipientAddressCard";
 import { mockRecipientHistory } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
@@ -53,6 +54,11 @@ const RecipientProfile = () => {
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="mt-6">
+        <h3 className="font-display font-bold text-lg mb-3">Alamat Pickup / Kontak</h3>
+        <RecipientAddressCard />
       </div>
 
       <div className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-soft">
