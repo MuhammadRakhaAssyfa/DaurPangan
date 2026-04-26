@@ -19,6 +19,7 @@ import RecipientHome from "./pages/recipient/RecipientHome.tsx";
 import RecipientHistory from "./pages/recipient/RecipientHistory.tsx";
 import RecipientNotifications from "./pages/recipient/RecipientNotifications.tsx";
 import RecipientProfile from "./pages/recipient/RecipientProfile.tsx";
+import ProviderPublicProfile from "./pages/recipient/ProviderPublicProfile.tsx";
 
 const queryClient = new QueryClient();
 
