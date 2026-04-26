@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { FoodCard } from "@/components/FoodCard";
 import { ClaimDialog } from "@/components/ClaimDialog";
 import { ProviderTypeBadge } from "@/components/ProviderTypeBadge";
+import { RecipientMap } from "@/components/recipient/RecipientMap";
 import {
   mockListings,
   mockNotifications,
@@ -105,49 +106,13 @@ const RecipientHome = () => {
 
         {/* ========== FOOD TAB ========== */}
         <TabsContent value="food" className="mt-6">
-          <div className="relative overflow-hidden rounded-3xl border border-border shadow-soft h-64 md:h-80">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary-soft via-background to-accent/20" />
-            <div
-              className="absolute inset-0"
-              style={{
-                backgroundImage: `radial-gradient(circle at 1px 1px, hsl(var(--primary) / 0.15) 1px, transparent 0)`,
-                backgroundSize: "24px 24px",
-              }}
-            />
-            {filtered.slice(0, 6).map((l, i) => (
-              <button
-                key={l.id}
-                className="absolute group"
-                style={{
-                  top: `${20 + (i * 13) % 60}%`,
-                  left: `${15 + (i * 19) % 70}%`,
-                }}
-              >
-                <span className="relative flex">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-30" />
-                  <span
-                    className={cn(
-                      "relative flex h-9 w-9 items-center justify-center rounded-full shadow-elevated text-xs font-bold border-2 border-background",
-                      l.isFree ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground",
-                    )}
-                  >
-                    {l.distanceKm}km
-                  </span>
-                </span>
-                <div className="absolute left-1/2 -translate-x-1/2 mt-2 px-2.5 py-1 rounded-lg bg-foreground text-background text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                  {l.name}
-                </div>
-              </button>
-            ))}
-            <div className="absolute bottom-4 left-4 flex items-center gap-3 rounded-full bg-background/95 backdrop-blur px-4 py-2 shadow-card text-xs font-medium">
-              <span className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-primary" /> Gratis
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="h-2.5 w-2.5 rounded-full bg-accent" /> Diskon
-              </span>
-            </div>
-          </div>
+          <RecipientMap
+            listings={filtered}
+            onListingClick={(id) => {
+              const target = filtered.find((x) => x.id === id);
+              if (target) setClaimTarget(target);
+            }}
+          />
 
           <div className="mt-8 flex flex-col gap-4">
             <div className="flex gap-3 items-center flex-wrap">
