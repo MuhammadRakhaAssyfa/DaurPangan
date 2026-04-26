@@ -91,7 +91,13 @@ export interface FoodListing {
   condition?: ProductCondition;
   /** Whether the listing requires manual provider confirmation before deal */
   requiresConfirmation?: boolean;
+  /** Geo coordinates for map display */
+  lat?: number;
+  lng?: number;
 }
+
+/** Default Jakarta center used by the recipient map */
+export const JAKARTA_CENTER = { lat: -6.2088, lng: 106.8456 };
 
 const inHours = (h: number) => new Date(Date.now() + h * 3600 * 1000);
 
