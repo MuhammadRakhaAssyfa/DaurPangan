@@ -156,7 +156,19 @@ export const FoodCard = ({ listing, onClaim }: Props) => {
             {listing.providerRating}
           </span>
         </div>
-        <p className="text-sm text-muted-foreground">{listing.provider}</p>
+        {(() => {
+          const pid = providerIdByName[listing.provider];
+          return pid ? (
+            <Link
+              to={`/provider/${pid}/profile`}
+              className="text-sm text-muted-foreground hover:text-foreground hover:underline underline-offset-2 transition-colors w-fit"
+            >
+              {listing.provider}
+            </Link>
+          ) : (
+            <p className="text-sm text-muted-foreground">{listing.provider}</p>
+          );
+        })()}
 
         <div className="flex flex-wrap items-center gap-1.5">
           <Badge className={cn("text-[11px] font-semibold gap-1 px-2 py-0.5", theme.badge)}>
