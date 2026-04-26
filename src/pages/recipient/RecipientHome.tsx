@@ -104,24 +104,44 @@ const RecipientHome = () => {
             onChange={(e) => setQuery(e.target.value)}
             className="max-w-sm"
           />
-          <Button variant={freeOnly ? "default" : "outline"} onClick={() => setFreeOnly((v) => !v)}>
-            <SlidersHorizontal className="h-4 w-4" />
-            Hanya Gratis
-          </Button>
+          <div className="inline-flex rounded-full border border-border bg-card p-1 text-sm">
+            <button
+              type="button"
+              onClick={() => setFreeOnly(false)}
+              className={cn(
+                "px-3 py-1.5 rounded-full font-medium transition-colors",
+                !freeOnly ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              Semua Harga
+            </button>
+            <button
+              type="button"
+              onClick={() => setFreeOnly(true)}
+              className={cn(
+                "px-3 py-1.5 rounded-full font-medium transition-colors inline-flex items-center gap-1.5",
+                freeOnly ? "bg-success text-success-foreground" : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <SlidersHorizontal className="h-3.5 w-3.5" />
+              Gratis Saja
+            </button>
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {categories.map((c) => (
+          {typeFilters.map((c) => (
             <Badge
               key={c.id}
-              onClick={() => setCategory(c.id)}
+              onClick={() => setTypeFilter(c.id)}
               className={cn(
-                "cursor-pointer px-4 py-1.5 text-sm border transition-colors",
-                category === c.id
+                "cursor-pointer px-4 py-1.5 text-sm border transition-colors gap-1",
+                typeFilter === c.id
                   ? "bg-primary text-primary-foreground border-primary"
                   : "bg-card text-foreground border-border hover:bg-muted",
               )}
             >
+              {c.emoji && <span aria-hidden>{c.emoji}</span>}
               {c.label}
             </Badge>
           ))}
@@ -140,12 +160,21 @@ const RecipientHome = () => {
               <FoodCard
                 key={l.id}
                 listing={l}
-                onClaim={() => toast.success(`Berhasil mengklaim: ${l.name}`)}
+                onClaim={(id) => {
+                  const target = filtered.find((x) => x.id === id);
+                  if (target) setClaimTarget(target);
+                }}
               />
             ))}
           </div>
         )}
       </div>
+
+      <ClaimDialog
+        listing={claimTarget}
+        open={!!claimTarget}
+        onOpenChange={(o) => !o && setClaimTarget(null)}
+      />
     </div>
   );
 };
