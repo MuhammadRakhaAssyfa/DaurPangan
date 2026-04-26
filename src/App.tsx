@@ -12,6 +12,7 @@ import { ProviderLayout } from "@/components/layouts/ProviderLayout";
 import { RecipientLayout } from "@/components/layouts/RecipientLayout";
 import ProviderDashboard from "./pages/ProviderDashboard.tsx";
 import ProviderListings from "./pages/provider/ProviderListings.tsx";
+import ProviderMarketplace from "./pages/provider/ProviderMarketplace.tsx";
 import ProviderHistory from "./pages/provider/ProviderHistory.tsx";
 import ProviderProfile from "./pages/provider/ProviderProfile.tsx";
 import RecipientHome from "./pages/recipient/RecipientHome.tsx";
@@ -38,6 +39,7 @@ const App = () => (
               <Route index element={<Navigate to="/provider/dashboard" replace />} />
               <Route path="dashboard" element={<ProviderDashboard />} />
               <Route path="listings" element={<ProviderListings />} />
+              <Route path="marketplace" element={<ProviderMarketplace />} />
               <Route path="history" element={<ProviderHistory />} />
               <Route path="profile" element={<ProviderProfile />} />
             </Route>

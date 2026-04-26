@@ -1,5 +1,5 @@
 import { Outlet, NavLink, Navigate, useLocation, Link } from "react-router-dom";
-import { Sprout, LayoutDashboard, ListChecks, History, User, LogOut, Menu } from "lucide-react";
+import { Sprout, LayoutDashboard, ListChecks, Store, History, User, LogOut, Menu } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { toast } from "sonner";
 const navItems = [
   { to: "/provider/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/provider/listings", label: "Listing Saya", icon: ListChecks },
+  { to: "/provider/marketplace", label: "Marketplace", icon: Store },
   { to: "/provider/history", label: "Riwayat", icon: History },
   { to: "/provider/profile", label: "Profil", icon: User },
 ];

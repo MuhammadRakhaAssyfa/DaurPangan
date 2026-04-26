@@ -1,7 +1,13 @@
 import { useMemo, useState } from "react";
-import { Plus, MoreHorizontal } from "lucide-react";
+import { Plus, MoreHorizontal, Pencil, Trash2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { mockListings, type FoodListing, type FoodStatus } from "@/lib/mock-data";
 import { UploadFoodDialog } from "@/components/provider/UploadFoodDialog";
 import { useAuth } from "@/lib/auth";
@@ -30,12 +36,24 @@ const ProviderListings = () => {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState<FoodStatus | "all">("all");
-  const [listings, setListings] = useState<FoodListing[]>(
-    mockListings.map((l, i) => ({
-      ...l,
-      status: i % 3 === 1 ? "claimed" : i % 5 === 4 ? "expired" : "available",
-    })),
-  );
+
+  // Only listings owned by THIS provider account.
+  // We seed with a couple of mock listings rebranded to the current user so
+  // the page never shows other providers' data.
+  const [listings, setListings] = useState<FoodListing[]>(() => {
+    const ownName = user?.name || "Akun Saya";
+    const ownType = user?.providerType || "restoran";
+    return mockListings
+      .filter((l) => l.providerType === ownType)
+      .slice(0, 3)
+      .map((l, i) => ({
+        ...l,
+        id: `own-${l.id}`,
+        provider: ownName,
+        providerType: ownType,
+        status: (i === 1 ? "claimed" : "available") as FoodStatus,
+      }));
+  });
 
   const filtered = useMemo(
     () => (filter === "all" ? listings : listings.filter((l) => l.status === filter)),
@@ -72,13 +90,27 @@ const ProviderListings = () => {
     toast.success("Listing baru berhasil dipublikasikan!");
   };
 
+  const handleDelete = (id: string) => {
+    setListings((prev) => prev.filter((l) => l.id !== id));
+    toast.success("Listing dihapus");
+  };
+
+  const handleMarkOut = (id: string) => {
+    setListings((prev) =>
+      prev.map((l) => (l.id === id ? { ...l, status: "expired" as FoodStatus } : l)),
+    );
+    toast.success("Listing ditandai habis");
+  };
+
   return (
     <div className="container py-10">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
           <span className="text-xs font-bold tracking-[0.2em] text-primary uppercase">Listing Saya</span>
-          <h1 className="mt-1 font-display text-3xl md:text-4xl font-bold">Kelola semua listing</h1>
-          <p className="text-muted-foreground mt-1">{listings.length} total listing</p>
+          <h1 className="mt-1 font-display text-3xl md:text-4xl font-bold">Kelola listing Anda</h1>
+          <p className="text-muted-foreground mt-1">
+            {listings.length} listing milik {user?.name || "Anda"}
+          </p>
         </div>
         <Button size="lg" variant="hero" onClick={() => setOpen(true)}>
           <Plus className="h-4 w-4" /> Upload Makanan
@@ -121,9 +153,27 @@ const ProviderListings = () => {
                     {l.quantity} · {l.location} · {l.isFree ? "Gratis" : `Rp${l.price?.toLocaleString("id-ID")}`}
                   </p>
                 </div>
-                <Button variant="ghost" size="icon" className="shrink-0">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="shrink-0" aria-label="Aksi listing">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-44">
+                    <DropdownMenuItem onClick={() => toast.info("Edit segera hadir")}>
+                      <Pencil className="h-4 w-4" /> Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleMarkOut(l.id)}>
+                      <CheckCircle2 className="h-4 w-4" /> Tandai Habis
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => handleDelete(l.id)}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" /> Hapus
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </li>
             ))}
           </ul>
