@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { AlertCircle, Clock, Info, MapPin } from "lucide-react";
+import { Link } from "react-router-dom";
+import { AlertCircle, Clock, Info, MapPin, StickyNote } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -11,9 +12,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { ProviderTypeBadge } from "@/components/ProviderTypeBadge";
 import type { FoodListing } from "@/lib/mock-data";
 import { providerTypeMap } from "@/lib/mock-data";
+import { useRecipientAddress } from "@/hooks/use-recipient-address";
 import { toast } from "sonner";
 
 interface Props {
@@ -26,7 +29,9 @@ const formatRupiah = (n: number) => `Rp${n.toLocaleString("id-ID")}`;
 
 export const ClaimDialog = ({ listing, open, onOpenChange }: Props) => {
   const [qty, setQty] = useState(1);
+  const [note, setNote] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const { address } = useRecipientAddress();
 
   if (!listing) return null;
   const { providerType } = listing;
@@ -50,11 +55,12 @@ export const ClaimDialog = ({ listing, open, onOpenChange }: Props) => {
     }
     onOpenChange(false);
     setQty(1);
+    setNote("");
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-display text-xl">
             {isRumah ? "Minta makanan ini" : "Klaim makanan"}
@@ -96,6 +102,37 @@ export const ClaimDialog = ({ listing, open, onOpenChange }: Props) => {
           </div>
         )}
 
+        {/* Recipient address for provider reference */}
+        {address ? (
+          <div className="rounded-xl border border-border p-3 bg-card text-xs space-y-1">
+            <div className="flex items-center gap-1.5 font-semibold text-foreground">
+              <MapPin className="h-3.5 w-3.5 text-primary" /> Alamat kontak Anda
+            </div>
+            <p className="text-foreground">{address.fullAddress}</p>
+            <p className="text-muted-foreground">
+              {address.kelurahan}, {address.kecamatan}, {address.kota} {address.kodePos}
+            </p>
+            <p className="text-[11px] text-muted-foreground italic">
+              Dikirim ke penyedia sebagai referensi kontak/pickup.
+            </p>
+          </div>
+        ) : (
+          <div className="flex items-start gap-2 rounded-xl border border-dashed border-accent/40 bg-accent/10 p-3 text-xs">
+            <AlertCircle className="h-4 w-4 text-accent-foreground shrink-0 mt-0.5" />
+            <p>
+              Tambahkan alamat di{" "}
+              <Link
+                to="/recipient/profile"
+                className="font-semibold underline underline-offset-2"
+                onClick={() => onOpenChange(false)}
+              >
+                profil kamu
+              </Link>{" "}
+              agar penyedia bisa menghubungimu lebih mudah.
+            </p>
+          </div>
+        )}
+
         <form onSubmit={handleClaim} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="qty-claim">Jumlah ({listing.quantityUnit})</Label>
@@ -109,6 +146,19 @@ export const ClaimDialog = ({ listing, open, onOpenChange }: Props) => {
               required
             />
             {error && <p className="text-xs text-destructive">{error}</p>}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="note-claim" className="flex items-center gap-1.5">
+              <StickyNote className="h-3.5 w-3.5" /> Catatan untuk penyedia (opsional)
+            </Label>
+            <Textarea
+              id="note-claim"
+              placeholder="Contoh: Saya bisa pickup jam 5 sore"
+              value={note}
+              onChange={(e) => setNote(e.target.value.slice(0, 300))}
+              className="min-h-[72px]"
+            />
           </div>
 
           {!listing.isFree && listing.price && (
