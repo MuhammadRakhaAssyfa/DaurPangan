@@ -1,5 +1,5 @@
 import { Outlet, NavLink, Navigate, useLocation, Link } from "react-router-dom";
-import { Sprout, LayoutDashboard, ListChecks, History, User, LogOut, Menu } from "lucide-react";
+import { Sprout, LayoutDashboard, ListChecks, Store, History, User, LogOut, Menu } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
