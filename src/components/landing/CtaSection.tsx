@@ -31,7 +31,7 @@ export const CtaSection = () => {
               Temukan makanan gratis atau diskon dari penyedia di sekitar Anda. Cepat, mudah, dan ramah lingkungan.
             </p>
             <Button asChild size="lg" className="mt-6 bg-foreground text-background hover:bg-foreground/90">
-              <Link to="/recipient">
+              <Link to="/auth/register?role=recipient">
                 Cari Makanan <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>

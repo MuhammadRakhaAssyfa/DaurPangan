@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Clock, MapPin, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ProviderTypeBadge } from "@/components/ProviderTypeBadge";
 import type { FoodListing } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
@@ -64,6 +65,7 @@ export const FoodCard = ({ listing, onClaim }: Props) => {
           </span>
         </div>
         <p className="text-sm text-muted-foreground">{listing.provider}</p>
+        <ProviderTypeBadge type={listing.providerType} className="self-start" />
 
         <div className="mt-1 flex items-center justify-between text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
