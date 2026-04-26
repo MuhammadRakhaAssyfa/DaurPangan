@@ -47,6 +47,14 @@ export const providerTypes: ProviderTypeMeta[] = [
 export const providerTypeMap: Record<ProviderType, ProviderTypeMeta> =
   Object.fromEntries(providerTypes.map((p) => [p.id, p])) as Record<ProviderType, ProviderTypeMeta>;
 
+export type ProductCondition = "segar" | "mendekati" | "sisa";
+
+export const conditionMap: Record<ProductCondition, { label: string; className: string }> = {
+  segar: { label: "Segar", className: "bg-success/10 text-success border-success/30" },
+  mendekati: { label: "Mendekati expired", className: "bg-accent/15 text-accent-foreground border-accent/40" },
+  sisa: { label: "Sisa display", className: "bg-muted text-muted-foreground border-border" },
+};
+
 export interface FoodListing {
   id: string;
   name: string;
@@ -54,14 +62,35 @@ export interface FoodListing {
   providerType: ProviderType;
   providerRating: number;
   image: string;
+  /** Numeric quantity remaining (porsi/kg/box/etc) */
+  quantityValue: number;
+  /** Unit label, e.g. "porsi", "kg", "ikat", "bungkus" */
+  quantityUnit: string;
+  /** Pre-formatted display string (kept for compatibility) */
   quantity: string;
   expiresAt: Date;
+  /** Whether expiry is per-day (toko & pasar) instead of hourly */
+  expiryGranularity?: "hour" | "day";
   distanceKm: number;
+  walkMinutes?: number;
   isFree: boolean;
   price?: number;
+  /** Original price used to render strikethrough discount */
+  originalPrice?: number;
+  /** Full pickup address (hidden for rumah tangga) */
   location: string;
+  /** Area only — kelurahan/kecamatan, used for rumah tangga */
+  area?: string;
   status: FoodStatus;
   category: "nasi" | "roti" | "sayur" | "buah" | "kue";
+  /** Optional notes shown on detail/claim */
+  notes?: string;
+  /** Minimum claim quantity (Hotel & Katering) */
+  minClaim?: number;
+  /** Product freshness/condition (Toko & Pasar) */
+  condition?: ProductCondition;
+  /** Whether the listing requires manual provider confirmation before deal */
+  requiresConfirmation?: boolean;
 }
 
 const inHours = (h: number) => new Date(Date.now() + h * 3600 * 1000);
