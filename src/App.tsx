@@ -35,6 +35,11 @@ const App = () => (
             <Route path="/auth/login" element={<Login />} />
             <Route path="/auth/register" element={<Register />} />
 
+            {/* Public provider profile — accessible to recipients & guests.
+                Declared BEFORE the /provider ProviderLayout so the more
+                specific path wins and is not hijacked by the auth guard. */}
+            <Route path="/provider/:id/profile" element={<ProviderPublicProfile />} />
+
             {/* Provider app — guarded inside layout */}
             <Route path="/provider" element={<ProviderLayout />}>
               <Route index element={<Navigate to="/provider/dashboard" replace />} />
