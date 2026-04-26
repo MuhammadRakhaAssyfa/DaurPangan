@@ -1,8 +1,15 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Calendar, Clock, Footprints, MapPin, Star, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { conditionMap, providerTypeMap, type FoodListing, type ProviderType } from "@/lib/mock-data";
+import {
+  conditionMap,
+  providerIdByName,
+  providerTypeMap,
+  type FoodListing,
+  type ProviderType,
+} from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
 const formatRupiah = (n: number) => `Rp${n.toLocaleString("id-ID")}`;
