@@ -1,6 +1,7 @@
 import { Mail, Star, MapPin } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { RoleBadge } from "@/components/RoleBadge";
+import { RecipientAddressCard } from "@/components/recipient/RecipientAddressCard";
 import { mockRecipientHistory } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
