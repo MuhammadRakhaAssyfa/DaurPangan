@@ -509,3 +509,13 @@ export const providerIdByName: Record<string, string> = Object.fromEntries(
   mockProviders.map((p) => [p.name, p.id]),
 );
 
+
+// ============= Recipient address =============
+
+export interface RecipientAddress {
+  fullAddress: string;
+  kelurahan: string;
+  kecamatan: string;
+  kota: string;
+  kodePos: string;
+}
