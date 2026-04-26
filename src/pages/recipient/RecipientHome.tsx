@@ -5,33 +5,30 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { FoodCard } from "@/components/FoodCard";
-import { mockListings, mockNotifications } from "@/lib/mock-data";
-import { toast } from "sonner";
+import { ClaimDialog } from "@/components/ClaimDialog";
+import { mockListings, mockNotifications, providerTypes, type FoodListing, type ProviderType } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
-const categories = [
+const typeFilters: { id: ProviderType | "all"; label: string; emoji?: string }[] = [
   { id: "all", label: "Semua" },
-  { id: "nasi", label: "Nasi" },
-  { id: "roti", label: "Roti" },
-  { id: "sayur", label: "Sayur" },
-  { id: "buah", label: "Buah" },
-  { id: "kue", label: "Kue" },
-] as const;
+  ...providerTypes.map((p) => ({ id: p.id, label: p.label, emoji: p.emoji })),
+];
 
 const RecipientHome = () => {
   const [freeOnly, setFreeOnly] = useState(false);
-  const [category, setCategory] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<ProviderType | "all">("all");
   const [query, setQuery] = useState("");
+  const [claimTarget, setClaimTarget] = useState<FoodListing | null>(null);
   const unread = mockNotifications.filter((n) => !n.read).length;
 
   const filtered = useMemo(() => {
     return mockListings.filter((l) => {
       if (freeOnly && !l.isFree) return false;
-      if (category !== "all" && l.category !== category) return false;
+      if (typeFilter !== "all" && l.providerType !== typeFilter) return false;
       if (query && !l.name.toLowerCase().includes(query.toLowerCase())) return false;
       return true;
     }).sort((a, b) => a.distanceKm - b.distanceKm);
-  }, [freeOnly, category, query]);
+  }, [freeOnly, typeFilter, query]);
 
   return (
     <div className="container py-10">
