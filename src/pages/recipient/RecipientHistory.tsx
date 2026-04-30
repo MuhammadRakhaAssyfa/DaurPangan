@@ -1,18 +1,26 @@
 import { useState } from "react";
-import { Star } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Star, Inbox, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { mockRecipientHistory, type PickupRecord } from "@/lib/mock-data";
+import { type PickupRecord } from "@/lib/mock-data";
 import { ProviderTypeBadge } from "@/components/ProviderTypeBadge";
 import { RatingDialog } from "@/components/RatingDialog";
+import { useLocalStorage } from "@/hooks/use-local-storage";
+import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 const formatDate = (d: Date) =>
-  new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric" }).format(d);
+  new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric" }).format(
+    d instanceof Date ? d : new Date(d as unknown as string),
+  );
 
 const RecipientHistory = () => {
-  const [history, setHistory] = useState<PickupRecord[]>(mockRecipientHistory);
+  const { user } = useAuth();
+  // New accounts start empty — history persists per user.
+  const storageKey = `daurpangan.history.recipient.${user?.email ?? "anon"}`;
+  const [history, setHistory] = useLocalStorage<PickupRecord[]>(storageKey, []);
   const [active, setActive] = useState<PickupRecord | null>(null);
   const [open, setOpen] = useState(false);
 
@@ -35,16 +43,25 @@ const RecipientHistory = () => {
       <span className="text-xs font-bold tracking-[0.2em] text-accent-foreground uppercase">Riwayat</span>
       <h1 className="mt-1 font-display text-3xl md:text-4xl font-bold">Klaim makanan Anda</h1>
       <p className="text-muted-foreground mt-1">
-        {pendingCount > 0
-          ? `${pendingCount} pickup belum diberi ulasan.`
-          : "Semua pickup telah diberi ulasan. Terima kasih!"}
+        {history.length === 0
+          ? "Belum ada riwayat klaim."
+          : pendingCount > 0
+            ? `${pendingCount} pickup belum diberi ulasan.`
+            : "Semua pickup telah diberi ulasan. Terima kasih!"}
       </p>
 
       <div className="mt-8 space-y-3">
         {history.length === 0 && (
-          <p className="rounded-2xl border border-dashed p-12 text-center text-muted-foreground">
-            Belum ada klaim.
-          </p>
+          <div className="rounded-2xl border border-dashed border-border p-12 text-center flex flex-col items-center gap-3">
+            <div className="text-4xl" aria-hidden>📭</div>
+            <p className="font-semibold">Belum ada riwayat klaim</p>
+            <p className="text-sm text-muted-foreground max-w-sm">
+              Makanan yang kamu klaim akan tercatat di sini.
+            </p>
+            <Button asChild variant="hero" size="sm" className="mt-2">
+              <Link to="/recipient">Cari Makanan</Link>
+            </Button>
+          </div>
         )}
         {history.map((r) => (
           <div
@@ -69,16 +86,21 @@ const RecipientHistory = () => {
             </div>
             <div className="shrink-0">
               {r.rated ? (
-                <div className="flex items-center gap-1 text-sm font-medium">
-                  {[1, 2, 3, 4, 5].map((v) => (
-                    <Star
-                      key={v}
-                      className={cn(
-                        "h-4 w-4",
-                        (r.rating ?? 0) >= v ? "fill-accent text-accent" : "text-muted-foreground/30",
-                      )}
-                    />
-                  ))}
+                <div className="flex flex-col items-end gap-1">
+                  <div className="flex items-center gap-1 text-sm font-medium">
+                    {[1, 2, 3, 4, 5].map((v) => (
+                      <Star
+                        key={v}
+                        className={cn(
+                          "h-4 w-4",
+                          (r.rating ?? 0) >= v ? "fill-accent text-accent" : "text-muted-foreground/30",
+                        )}
+                      />
+                    ))}
+                  </div>
+                  <Button size="sm" variant="ghost" disabled className="h-7 text-xs gap-1">
+                    <CheckCircle2 className="h-3.5 w-3.5" /> Sudah Diulas
+                  </Button>
                 </div>
               ) : (
                 <Button variant="hero" size="sm" onClick={() => handleRate(r)}>
