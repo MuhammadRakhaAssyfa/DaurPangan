@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { RoleBadge } from "@/components/RoleBadge";
-import { mockNotifications } from "@/lib/mock-data";
+import { useNotifications } from "@/hooks/use-notifications";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -19,7 +19,7 @@ export const RecipientLayout = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const unread = mockNotifications.filter((n) => !n.read).length;
+  const { unread } = useNotifications();
 
   if (!user) return <Navigate to="/auth/login?role=recipient" replace state={{ from: location }} />;
   if (user.role !== "recipient") return <Navigate to="/provider/dashboard" replace />;
