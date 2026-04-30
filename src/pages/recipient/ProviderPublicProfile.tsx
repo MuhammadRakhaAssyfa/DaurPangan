@@ -77,19 +77,19 @@ const ProviderPublicProfile = () => {
       icon: Leaf,
       label: "Kg Diselamatkan",
       value: profile.impact.kgSaved,
-      empty: "0 kg · Mulai berbagi untuk mencatat dampakmu 🌿",
+      empty: "Belum ada makanan yang dibagikan 🌿",
     },
     {
       icon: Package,
-      label: "Total Upload",
+      label: "Total Berbagi",
       value: profile.impact.totalUploads,
-      empty: "0 · Belum ada listing yang dibagikan 📦",
+      empty: "Belum ada listing yang diupload 📦",
     },
     {
       icon: Users,
       label: "Penerima Terbantu",
       value: profile.impact.recipientsHelped,
-      empty: "0 · Belum ada penerima 👥",
+      empty: "Belum ada penerima 👥",
     },
   ];
 
