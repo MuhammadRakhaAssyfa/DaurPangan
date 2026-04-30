@@ -10,7 +10,9 @@ import {
   mockListings,
   providerProfileMap,
   type FoodListing,
+  type ProviderProfile,
 } from "@/lib/mock-data";
+import { useAuth } from "@/lib/auth";
 
 const formatDate = (d: Date) =>
   d.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
@@ -18,8 +20,30 @@ const formatDate = (d: Date) =>
 const ProviderPublicProfile = () => {
   const { id = "" } = useParams();
   const navigate = useNavigate();
-  const profile = providerProfileMap[id];
+  const { user } = useAuth();
+  const seeded = providerProfileMap[id];
   const [claimTarget, setClaimTarget] = useState<FoodListing | null>(null);
+
+  // For freshly-registered providers (no seeded entry), build a real-zero profile
+  // from the current auth user. Stats stay at 0 until real activity happens.
+  const profile: ProviderProfile | null = useMemo(() => {
+    if (seeded) return seeded;
+    if (user?.role === "provider" && user.providerType) {
+      return {
+        id,
+        name: user.name,
+        type: user.providerType,
+        area: "—",
+        rating: 0,
+        totalReviews: 0,
+        bio: "Penyedia baru di DaurPangan. Mulai berbagi untuk membangun jejak dampakmu.",
+        avatar: "",
+        impact: { kgSaved: 0, totalUploads: 0, recipientsHelped: 0 },
+        reviews: [],
+      };
+    }
+    return null;
+  }, [seeded, user, id]);
 
   const activeListings = useMemo(
     () =>
@@ -53,19 +77,19 @@ const ProviderPublicProfile = () => {
       icon: Leaf,
       label: "Kg Diselamatkan",
       value: profile.impact.kgSaved,
-      empty: "0 kg · Mulai berbagi untuk mencatat dampakmu 🌿",
+      empty: "Belum ada makanan yang dibagikan 🌿",
     },
     {
       icon: Package,
-      label: "Total Upload",
+      label: "Total Berbagi",
       value: profile.impact.totalUploads,
-      empty: "0 · Belum ada listing yang dibagikan 📦",
+      empty: "Belum ada listing yang diupload 📦",
     },
     {
       icon: Users,
       label: "Penerima Terbantu",
       value: profile.impact.recipientsHelped,
-      empty: "0 · Belum ada penerima 👥",
+      empty: "Belum ada penerima 👥",
     },
   ];
 
